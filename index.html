@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 5px 0; }
+
+        .task-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .task-card.selected {
+            background-color: #d3f9d8; /* Light green for selected */
+        }
+
+        .task-card:hover {
+            background-color: #f0f0f0; /* Light gray on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    
+    <!-- Form to Add a Task -->
+    <form id="addTaskForm">
+        <input type="text" id="taskDescription" placeholder="Task description" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <p id="response"></p>
+    
+    <!-- Form to Delete a Task -->
+    <form id="deleteTaskForm">
+        <button type="submit">Delete Task</button>
+    </form>
+
+    <!-- Container for Displaying Tasks as Cards -->
+    <h2>All Tasks</h2>
+    <div id="taskContainer"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let selectedTaskId = null;
+
+            function fetchTasks() {
+                fetch('http://127.0.0.1:8000/tasks')
+                    .then(response => response.json())
+                    .then(data => {
+                        const taskContainer = document.getElementById('taskContainer');
+                        taskContainer.innerHTML = '';  // Clear existing tasks
+                        data.forEach(task => {
+                            const card = document.createElement('div');
+                            card.className = 'task-card';
+                            card.dataset.id = task.id;
+                            card.innerHTML = `
+                                <strong>ID:</strong> ${task.id}<br>
+                                <strong>Description:</strong> ${task.task_description}<br>
+                                <strong>Done:</strong> ${task.done}<br>
+                                <strong>User ID:</strong> ${task.user_id}
+                            `;
+                            card.addEventListener('click', function() {
+                                document.querySelectorAll('.task-card').forEach(c => c.classList.remove('selected'));
+                                card.classList.add('selected');
+                                selectedTaskId = card.dataset.id;
+                            });
+                            taskContainer.appendChild(card);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        responseElement.textContent = `Error fetching tasks: ${error.detail || 'Unknown error'}`;
+                    });
+            }
+
+            fetchTasks();
+
+            const addTaskForm = document.getElementById('addTaskForm');
+            const deleteTaskForm = document.getElementById('deleteTaskForm');
+            const responseElement = document.getElementById('response');
+
+            addTaskForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const taskDescription = document.getElementById('taskDescription').value;
+                const userId = 1;
+
+                fetch('http://127.0.0.1:8000/tasks/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task_description: taskDescription,
+                        done: false,
+                        user_id: userId
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    responseElement.textContent = `Task Added: ID ${data.id}, Description: ${data.task_description}`;
+                    fetchTasks();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    responseElement.textContent = `Error: ${error.detail || 'Unknown error'}`;
+                });
+            });
+
+            deleteTaskForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                if (selectedTaskId === null) {
+                    responseElement.textContent = 'No task selected for deletion.';
+                    return;
+                }
+
+                fetch(`http://127.0.0.1:8000/tasks/delete?task_id=${selectedTaskId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        responseElement.textContent = `Task Deleted: ID ${selectedTaskId}`;
+                        fetchTasks();
+                        selectedTaskId = null;
+                    } else {
+                        return response.json().then(err => { throw err; });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    responseElement.textContent = `Error: ${error.detail || 'Unknown error'}`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
