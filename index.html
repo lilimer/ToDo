@@ -9,36 +9,77 @@
 <body>
     <h1>Task Manager</h1>
 
-     <div class="popup" onclick="popupFunction()">Click me!
-    <span class="popuptext" id="myPopup">Popup text...</span>
-    </div>
-    
-    <!-- Form to Add a Task -->
-    <form id="addTaskForm">
+
+    <button style="display:none;" class="selectedTaskButton open-button-edit" onclick="openEdit()">Edit task</button>
+     <!-- A button to open the popup form -->
+    <button class="open-button-add" onclick="openAdd()">Add task</button>
+
+    <!-- The form -->
+    <div class="form-popup" id="addForm">
+      <form id="addTaskForm" class="form-container">
+        <h1>Add task</h1>
+
         <input type="text" id="taskDescription" placeholder="Task description" required>
         <input type="date" id="taskExpire"  />
-        <button type="submit">Add Task</button>
-    </form>
+
+
+        <button type="submit" class="btn" onclick="closeAdd()">Add Task</button>
+        <button type="button" class="btn cancel" onclick="closeAdd()">Close</button>
+      </form>
+    </div>
+
+    <!-- The form -->
+    <div class="form-popup" id="editForm">
+      <form id="editTaskForm" class="form-container">
+        <h1>Edit task</h1>
+
+        <input type="text" id="editTaskDescription" placeholder="" required>
+
+
+        <button type="submit" class="btn" onclick="closeEdit()">Edit Task</button>
+        <button type="button" class="btn cancel" onclick="closeEdit()">Close</button>
+      </form>
+    </div>
+
+
+    <button class="open-button-group" onclick="openGroup()">Add group</button>
+
+    <!-- The form -->
+    <div class="form-popup" id="addGroup">
+      <form id="addGroupForm" class="form-container">
+        <h1>Add group</h1>
+
+        <input type="text" id="groupName" placeholder="Task description" required>
+
+
+        <button type="submit" class="btn" onclick="closeGroup()">Add Group</button>
+        <button type="button" class="btn cancel" onclick="closeGroup()">Close</button>
+      </form>
+    </div>
+
+
+
+
 
     <p id="response"></p>
-    
+
     <!-- Form to Delete a Task -->
     <form id="deleteTaskForm">
-        <button type="submit">Delete Task</button>
+        <button style="display:none;" class="selectedTaskButton open-button-delete" type="submit">Delete Task</button>
     </form>
 
-    <form id="editTaskForm">
-        <input type="text" id="editTaskDescription" placeholder="New task description" required>
-        <button type="submit">Edit Task</button>
-    </form>
+
 
     <form id="changeStatus">
-        <button type="submit">Done/Undone</button>
+        <button style="display:none;" class="selectedTaskButton open-button-done" type="submit">Done/Undone</button>
     </form>
-     
+
     <!-- Container for Displaying Tasks as Cards -->
     <h2>All Tasks</h2>
     <div id="taskContainer"></div>
+
+    <div id="groupsContainer"></div>
+
 
     <script src="script.js"></script>
 </body>

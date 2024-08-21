@@ -11,13 +11,21 @@ def init_db():
     db = get_db()
     cursor = db.cursor()
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task TEXT NOT NULL,
-            done BOOLEAN NOT NULL,
-            user_id INTEGER NOT NULL,
-            expires TEXT NOT NULL
-        )
-    """)
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task TEXT NOT NULL,
+                done BOOLEAN NOT NULL,
+                user_id INTEGER NOT NULL,
+                expires TEXT NOT NULL,
+                priority INTEGER NOT NULL,
+                group_id INTEGER NOT NULL
+            )
+        """)
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS groups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )
+        """)
     db.commit()
     db.close()
