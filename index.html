@@ -7,9 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Task Manager</h1>
-
-
     <button style="display:none;" class="selectedTaskButton open-button-edit" onclick="openEdit()">Edit task</button>
      <!-- A button to open the popup form -->
     <button class="open-button-add" onclick="openAdd()">Add task</button>
@@ -18,22 +15,26 @@
     <div class="form-popup" id="addForm">
       <form id="addTaskForm" class="form-container">
         <h1>Add task</h1>
+        <textarea id="taskDescription" required></textarea>
+        <input type="date" id="taskExpire" />
 
-        <input type="text" id="taskDescription" placeholder="Task description" required>
-        <input type="date" id="taskExpire"  />
-
+        <label for="groupSelect">Grouap:</label>
+        <select id="groupSelect" required>
+          <option value="">Select a group</option>
+        </select>
 
         <button type="submit" class="btn" onclick="closeAdd()">Add Task</button>
         <button type="button" class="btn cancel" onclick="closeAdd()">Close</button>
       </form>
     </div>
 
+
     <!-- The form -->
     <div class="form-popup" id="editForm">
       <form id="editTaskForm" class="form-container">
         <h1>Edit task</h1>
 
-        <input type="text" id="editTaskDescription" placeholder="" required>
+        <textarea id="editTaskDescription" placeholder="" required></textarea>
 
 
         <button type="submit" class="btn" onclick="closeEdit()">Edit Task</button>
@@ -58,11 +59,6 @@
     </div>
 
 
-
-
-
-    <p id="response"></p>
-
     <!-- Form to Delete a Task -->
     <form id="deleteTaskForm">
         <button style="display:none;" class="selectedTaskButton open-button-delete" type="submit">Delete Task</button>
@@ -74,13 +70,9 @@
         <button style="display:none;" class="selectedTaskButton open-button-done" type="submit">Done/Undone</button>
     </form>
 
-    <!-- Container for Displaying Tasks as Cards -->
-    <h2>All Tasks</h2>
-    <div id="taskContainer"></div>
-
     <div id="groupsContainer"></div>
 
-
+    <script src="https://kit.fontawesome.com/d6bb35b948.js" crossorigin="anonymous"></script>
     <script src="script.js"></script>
 </body>
 </html>

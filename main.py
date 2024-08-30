@@ -40,6 +40,19 @@ async def delete_task(task_id: int, db: sqlite3.Connection = Depends(get_db)):
     return {"Task deleted"}
 
 
+@app.delete('/groups/delete')
+async def delete_task(group_id: int, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    cursor.execute("SELECT 1 FROM groups WHERE id = ?", (group_id,))
+    if not cursor.fetchone():
+        raise HTTPException(status_code=404, detail="Task does not exist")
+
+    crud.delete_group(db, group_id)
+    db.commit()
+
+    return {"Task deleted"}
+
+
 @app.put('/tasks/edit')
 async def edit_task(edit: TaskEdit, db: sqlite3.Connection = Depends(get_db)):
     cursor = db.cursor()

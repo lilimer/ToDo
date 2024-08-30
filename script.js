@@ -1,5 +1,5 @@
-// Define global functions
 let selectedTaskId = null;
+
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -53,13 +53,23 @@ function fetchGroups() {
             const groupContainer = document.getElementById('groupsContainer');
             groupContainer.innerHTML = ''; // Clear existing groups
 
+            const groupSelect = document.getElementById('groupSelect');
+            groupSelect.innerHTML = '<option>Select a group</option>'; // Reset dropdown options
+
+
             data.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = group.group_name;
+                groupSelect.appendChild(option);
+
+
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'group';
-                groupDiv.dataset.id = group.id; // Use data-id for consistency
-                groupDiv.innerHTML = `<h3>${group.name}</h3>`;
+                groupDiv.dataset.id = group.id;
+                groupDiv.dataset.name = group.group_name;
 
-                // Create a container within each group div for tasks
+
                 const taskContainer = document.createElement('div');
                 taskContainer.className = 'task-container';
                 taskContainer.id = `task-container-${group.id}`;
@@ -72,12 +82,30 @@ function fetchGroups() {
 
             });
 
-            // After groups are created, fetch tasks
-            fetchTasks(); // No need to pass group IDs here
+            fetchTasks(); // Fetch tasks after creating groups
         })
         .catch(error => {
             console.error('Error:', error);
         });
+}
+
+function deleteGroup(groupId) {
+    fetch(`http://127.0.0.1:8000/groups/delete?group_id=${groupId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            fetchGroups(); // Refresh groups after deletion
+        } else {
+            return response.json().then(err => { throw err; });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
 
@@ -87,8 +115,29 @@ function fetchTasks() {
     fetch('http://127.0.0.1:8000/tasks')
         .then(response => response.json())
         .then(data => {
-            document.querySelectorAll('.group').forEach(container => container.innerHTML = '');
+            // Clear all groups and their contents
+            document.querySelectorAll('.group').forEach(container => {
+                container.innerHTML = '';
+                // Create and add the group title
+                const title = document.createElement('p');
+                title.className = 'group-title';
+                title.textContent = container.dataset.name;
+                container.appendChild(title);
 
+
+                // Create and add the delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button fa-solid fa-trash'; // Use class for styling
+                deleteButton.addEventListener('click', () => {
+                    if (confirm('Delete group?')) {
+                        deleteGroup(container.dataset.id);
+                    }
+                });
+                container.appendChild(deleteButton);
+            });
+
+            // Create a map to keep track of which group containers have tasks
+            const taskContainers = new Map();
 
             data.forEach(task => {
                 const card = document.createElement('div');
@@ -98,10 +147,10 @@ function fetchTasks() {
                 }
                 card.dataset.id = task.id;
                 card.innerHTML = `
-                    <strong>ID:</strong> ${task.id}<br>
-                    <strong>Description:</strong> ${task.task_description}<br>
-                    <strong>Done:</strong> ${task.done}<br>
-                    <strong>Expires:</strong> ${daysUntil(task.expires)} days (${task.expires})
+                    ${task.task_description}<br>
+                    <hr>
+                    Expires in ${daysUntil(task.expires)} days<br>
+                    (${task.expires})
                 `;
                 card.draggable = true;
                 card.addEventListener('dragstart', drag);
@@ -125,16 +174,24 @@ function fetchTasks() {
                 const taskContainer = document.querySelector(`.group[data-id='${task.group_id}']`);
 
                 if (taskContainer) {
+
+                    taskContainer.querySelector('button').style.display = 'none';
                     taskContainer.appendChild(card);
+                    taskContainers.set(task.group_id, true);
+
                 } else {
                     console.error(`No group container found for group_id ${task.group_id}`);
                 }
+
             });
+
         })
         .catch(error => {
             console.error('Error:', error);
         });
 }
+
+
 
 function daysUntil(expirationDate) {
     const today = new Date();
@@ -165,6 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const taskDescription = document.getElementById('taskDescription').value;
         const userId = 1;
         const taskExpire = document.getElementById('taskExpire').value;
+        const groupId = document.getElementById('groupSelect').value;
+
+        if (!groupId) {
+        alert('Please select a group.');
+        return;
+    }
 
         fetch('http://127.0.0.1:8000/tasks/add', {
             method: 'POST',
@@ -176,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 done: false,
                 user_id: userId,
                 expires: taskExpire,
-                group_id: 1 // Default group
+                group_id: groupId
             }),
         })
         .then(response => response.json())

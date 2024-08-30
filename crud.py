@@ -35,3 +35,10 @@ def task_move(db, task_id, new_id):
     cursor.execute("UPDATE tasks SET group_id = ? WHERE id = ?", (new_id, task_id,))
     db.commit()
     return True
+
+
+def delete_group(db, id):
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM groups WHERE id = ?", (id,))
+    db.commit()
+    return True
